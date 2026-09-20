@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Resistor Profesional</title>
+    <style>
+        /* CSS Reset & Variables */
+        :root {
+            --bg-base: #090d16;
+            --bg-card: rgba(21, 30, 49, 0.7);
+            --bg-card-hover: rgba(30, 42, 69, 0.8);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(56, 189, 248, 0.3);
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.25);
+            --accent: #10b981;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-subtle: #64748b;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-glow: 0 0 25px -5px rgba(56, 189, 248, 0.15);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Header Area */
+        header {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #f1f5f9 30%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.4rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Mode Selectors Container */
+        .controls-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-lg);
+        }
+
+        .segmented-control {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.25rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .segmented-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .segmented-btn.active {
+            background: var(--primary);
+            color: #090d16;
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        .type-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .type-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.4rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .type-btn.active {
+            border-color: var(--primary);
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-glow);
+            transition: var(--transition);
+        }
+
+        /* Resistor Display SVG Section */
+        .resistor-display-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 0;
+            position: relative;
+        }
+
+        .resistor-svg-container {
+            width: 100%;
+            max-width: 520px;
+            height: auto;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));
+        }
+
+        /* Result Display Section */
+        .result-box {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(10, 15, 30, 0.9) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .result-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-subtle);
+            font-weight: 700;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .result-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            color: #090d16;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Interactive Mode Switcher Tabs */
+        .mode-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            gap: 1.5rem;
+        }
+
+        .mode-tab {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 0.25rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .mode-tab.active {
+            color: var(--primary);
+        }
+
+        .mode-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        /* Band Color Selector Swatches */
+        .bands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .band-column {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+        }
+
+        .band-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .band-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.4rem;
+        }
+
+        .swatch-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.45rem 0.6rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            color: var(--text-main);
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-align: left;
+            transition: var(--transition);
+        }
+
+        .swatch-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .swatch-btn.selected {
+            border-color: var(--primary);
+            background: rgba(56, 189, 248, 0.12);
+            font-weight: 700;
+        }
+
+        .swatch-btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .swatch-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* Reverse Calculator & Presets */
+        .reverse-input-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .custom-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .custom-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+        .presets-wrapper {
+            margin-top: 1rem;
+        }
+
+        .presets-title {
+            font-size: 0.8rem;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .presets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .preset-chip {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .preset-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        /* Accordion Table */
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .accordion-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .accordion-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, margin-top 0.3s ease;
+        }
+
+        .accordion-content.open {
+            max-height: 1000px;
+            margin-top: 1.25rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 0.75rem 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--accent);
+            color: #090d16;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 1rem 0.5rem; }
+            header h1 { font-size: 1.75rem; }
+            .result-value { font-size: 1.5rem; }
+            .result-box { flex-direction: column; align-items: flex-start; }
+            .swatch-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <h1>Kalkulator Gelang Resistor</h1>
+            <p>Hitung nilai resistansi & cari gelang warna resistor secara akurat</p>
+        </header>
+
+        <!-- Mode & Type Controls -->
+        <div class="controls-header">
+            <div class="segmented-control">
+                <button class="segmented-btn active" id="btn-mode-4" onclick="setBandMode(4)">4 Gelang</button>
+                <button class="segmented-btn" id="btn-mode-5" onclick="setBandMode(5)">5 Gelang</button>
+            </div>
+
+            <div class="type-selector">
+                <span>Tipe Resistor:</span>
+                <button class="type-btn active" id="btn-type-carbon" onclick="setResistorType('carbon')">Carbon Film</button>
+                <button class="type-btn" id="btn-type-metal" onclick="setResistorType('metal')">Metal Film</button>
+            </div>
+        </div>
+
+        <!-- Main Resistor Interactive Card -->
+        <div class="glass-card">
+            <!-- SVG Dynamic Resistor Visual -->
+            <div class="resistor-display-wrapper">
+                <svg class="resistor-svg-container" viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Wire Metal Gradient -->
+                        <linearGradient id="wire-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#94a3b8"/>
+                            <stop offset="50%" stop-color="#f1f5f9"/>
+                            <stop offset="100%" stop-color="#475569"/>
+                        </linearGradient>
+
+                        <!-- Body Carbon Gradient -->
+                        <linearGradient id="body-carbon" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#e2b17a"/>
+                            <stop offset="25%" stop-color="#ebd0b0"/>
+                            <stop offset="70%" stop-color="#c89358"/>
+                            <stop offset="100%" stop-color="#8a5a29"/>
+                        </linearGradient>
+
+                        <!-- Body Metal Film Gradient -->
+                        <linearGradient id="body-metal" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#38bdf8"/>
+                            <stop offset="25%" stop-color="#bae6fd"/>
+                            <stop offset="70%" stop-color="#0284c7"/>
+                            <stop offset="100%" stop-color="#0369a1"/>
+                        </linearGradient>
+
+                        <!-- Glossy Overlay -->
+                        <linearGradient id="gloss-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+                            <stop offset="30%" stop-color="#ffffff" stop-opacity="0.05"/>
+                            <stop offset="80%" stop-color="#000000" stop-opacity="0.0"/>
+                            <stop offset="100%" stop-color="#000000" stop-opacity="0.3"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Terminal Wires -->
+                    <rect x="10" y="56" width="480" height="8" rx="4" fill="url(#wire-grad)" />
+
+                    <!-- Resistor Body Base -->
+                    <path id="resistor-body-path" fill="url(#body-carbon)" d="
+                        M 110,60 
+                        C 110,30 140,25 160,25 
+                        L 340,25 
+                        C 360,25 390,30 390,60 
+                        C 390,90 360,95 340,95 
+                        L 160,95 
+                        C 140,95 110,90 110,60 Z" />
+
+                    <!-- Resistor Bulges (Bulbs) -->
+                    <path id="resistor-bulge-left" fill="url(#body-carbon)" d="M 120,60 C 120,20 150,20 150,60 C 150,100 120,100 120,60 Z"/>
+                    <path id="resistor-bulge-right" fill="url(#body-carbon)" d="M 350,60 C 350,20 380,20 380,60 C 380,100 350,100 350,60 Z"/>
+
+                    <!-- Band 1 -->
+                    <rect id="svg-band1" x="160" y="25" width="16" height="70" fill="#8b4513" rx="2" />
+                    <!-- Band 2 -->
+                    <rect id="svg-band2" x="200" y="25" width="16" height="70" fill="#000000" rx="2" />
+                    <!-- Band 3 (Only visible in 5 band mode) -->
+                    <rect id="svg-band3" x="240" y="25" width="16" height="70" fill="#000000" rx="2" visibility="hidden" />
+                    <!-- Multiplier Band -->
+                    <rect id="svg-band-mult" x="280" y="25" width="16" height="70" fill="#ef4444" rx="2" />
+                    <!-- Tolerance Band -->
+                    <rect id="svg-band-tol" x="335" y="25" width="16" height="70" fill="#d4af37" rx="2" />
+
+                    <!-- Gloss Overlay -->
+                    <path fill="url(#gloss-grad)" d="
+                        M 110,60 
+                        C 110,30 140,25 160,25 
+                        L 340,25 
+                        C 360,25 390,30 390,60 
+                        C 390,90 360,95 340,95 
+                        L 160,95 
+                        C 140,95 110,90 110,60 Z" />
+                </svg>
+            </div>
+
+            <!-- Calculated Result Box -->
+            <div class="result-box">
+                <div class="result-info">
+                    <span class="result-label">Nilai Resistansi Total</span>
+                    <span class="result-value" id="res-val-main">1 kΩ ± 5%</span>
+                    <span class="result-sub" id="res-val-range">Rentang: 950 Ω - 1.05 kΩ</span>
+                </div>
+                <button class="btn-action" onclick="copyResult()">
+                    <span>📋 Salin Nilai</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Calculator Interaction Modes -->
+        <div class="glass-card">
+            <!-- Mode Tabs -->
+            <div class="mode-tabs">
+                <button class="mode-tab active" id="tab-direct" onclick="switchCalcTab('direct')">Pilih Warna Gelang</button>
+                <button class="mode-tab" id="tab-reverse" onclick="switchCalcTab('reverse')">Cari Warna dari Nilai (Terbalik)</button>
+            </div>
+
+            <!-- Tab 1: Direct Band Selection Grid -->
+            <div id="panel-direct">
+                <div class="bands-grid" id="bands-swatch-container">
+                    <!-- Dynamically Injected Swatches -->
+                </div>
+            </div>
+
+            <!-- Tab 2: Reverse Calculator Input & Presets -->
+            <div id="panel-reverse" style="display: none;">
+                <div class="reverse-input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="input-reverse-val" class="custom-input" placeholder="Masukkan Nilai (misal: 4.7k, 220, 1M)">
+                    </div>
+                    <button class="btn-action" onclick="processReverseSearch()" style="padding: 0 1.5rem;">Hitung Gelang</button>
+                </div>
+
+                <div class="presets-wrapper">
+                    <div class="presets-title">Contoh Presets Nilai Populer:</div>
+                    <div class="presets-grid">
+                        <button class="preset-chip" onclick="applyPreset('220')">220 Ω</button>
+                        <button class="preset-chip" onclick="applyPreset('1k')">1 kΩ</button>
+                        <button class="preset-chip" onclick="applyPreset('4.7k')">4.7 kΩ</button>
+                        <button class="preset-chip" onclick="applyPreset('10k')">10 kΩ</button>
+                        <button class="preset-chip" onclick="applyPreset('100k')">100 kΩ</button>
+                        <button class="preset-chip" onclick="applyPreset('1M')">1 MΩ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Table Accordion -->
+        <div class="glass-card">
+            <div class="accordion-header" onclick="toggleAccordion()">
+                <h2>Tabel Referensi Kode Warna Resistor</h2>
+                <span class="accordion-icon" id="acc-icon">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-content">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Warna</th>
+                                <th>Gelang 1</th>
+                                <th>Gelang 2</th>
+                                <th>Gelang 3</th>
+                                <th>Pengali</th>
+                                <th>Toleransi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ref-table-body">
+                            <!-- Injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div class="toast" id="toast-msg">Nilai berhasil disalin!</div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Core Resistor Master Color Dataset
+        const COLOR_DATA = [
+            { id: "black", name: "Hitam", hex: "#000000", digit: 0, mult: 1, tol: null },
+            { id: "brown", name: "Cokelat", hex: "#8b4513", digit: 1, mult: 10, tol: 1 },
+            { id: "red", name: "Merah", hex: "#ef4444", digit: 2, mult: 100, tol: 2 },
+            { id: "orange", name: "Oranye", hex: "#f97316", digit: 3, mult: 1000, tol: null },
+            { id: "yellow", name: "Kuning", hex: "#eab308", digit: 4, mult: 10000, tol: null },
+            { id: "green", name: "Hijau", hex: "#22c55e", digit: 5, mult: 100000, tol: 0.5 },
+            { id: "blue", name: "Biru", hex: "#3b82f6", digit: 6, mult: 1000000, tol: 0.25 },
+            { id: "violet", name: "Ungu", hex: "#a855f7", digit: 7, mult: 10000000, tol: 0.1 },
+            { id: "grey", name: "Abu-abu", hex: "#6b7280", digit: 8, mult: 100000000, tol: 0.05 },
+            { id: "white", name: "Putih", hex: "#f8fafc", digit: 9, mult: 1000000000, tol: null },
+            { id: "gold", name: "Emas", hex: "#d4af37", digit: null, mult: 0.1, tol: 5 },
+            { id: "silver", name: "Perak", hex: "#c0c0c0", digit: null, mult: 0.01, tol: 10 }
+        ];
+
+        // Application State
+        let currentMode = 4; // 4 or 5
+        let currentType = 'carbon'; // 'carbon' or 'metal'
+        let activeTab = 'direct'; // 'direct' or 'reverse'
+
+        let selectedBands = {
+            band1: "brown",
+            band2: "black",
+            band3: "black",
+            multiplier: "red",
+            tolerance: "gold"
+        };
+
+        // DOM Initializer
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSwatches();
+            renderRefTable();
+            calculateAndRender();
+        });
+
+        // Toggle Resistor Band Mode (4 or 5)
+        function setBandMode(mode) {
+            currentMode = mode;
+            document.getElementById('btn-mode-4').classList.toggle('active', mode === 4);
+            document.getElementById('btn-mode-5').classList.toggle('active', mode === 5);
+
+            // Toggle Band 3 SVG Visibility
+            const svgBand3 = document.getElementById('svg-band3');
+            if (mode === 5) {
+                svgBand3.setAttribute('visibility', 'visible');
+            } else {
+                svgBand3.setAttribute('visibility', 'hidden');
+            }
+
+            renderSwatches();
+            calculateAndRender();
+        }
+
+        // Toggle Resistor Visual Material Type
+        function setResistorType(type) {
+            currentType = type;
+            document.getElementById('btn-type-carbon').classList.toggle('active', type === 'carbon');
+            document.getElementById('btn-type-metal').classList.toggle('active', type === 'metal');
+
+            const bodyGrad = type === 'carbon' ? 'url(#body-carbon)' : 'url(#body-metal)';
+            document.getElementById('resistor-body-path').setAttribute('fill', bodyGrad);
+            document.getElementById('resistor-bulge-left').setAttribute('fill', bodyGrad);
+            document.getElementById('resistor-bulge-right').setAttribute('fill', bodyGrad);
+        }
+
+        // Switch interaction Tab
+        function switchCalcTab(tab) {
+            activeTab = tab;
+            document.getElementById('tab-direct').classList.toggle('active', tab === 'direct');
+            document.getElementById('tab-reverse').classList.toggle('active', tab === 'reverse');
+
+            document.getElementById('panel-direct').style.display = tab === 'direct' ? 'block' : 'none';
+            document.getElementById('panel-reverse').style.display = tab === 'reverse' ? 'block' : 'none';
+        }
+
+        // Render Color Swatches Dynamically
+        function renderSwatches() {
+            const container = document.getElementById('bands-swatch-container');
+            container.innerHTML = '';
+
+            const bandConfigs = [
+                { key: 'band1', title: 'Gelang 1 (Angka 1)', filter: c => c.digit !== null && c.id !== 'black' },
+                { key: 'band2', title: 'Gelang 2 (Angka 2)', filter: c => c.digit !== null },
+                ...(currentMode === 5 ? [{ key: 'band3', title: 'Gelang 3 (Angka 3)', filter: c => c.digit !== null }] : []),
+                { key: 'multiplier', title: 'Gelang Pengali', filter: c => c.mult !== null },
+                { key: 'tolerance', title: 'Gelang Toleransi', filter: c => c.tol !== null }
+            ];
+
+            bandConfigs.forEach(config => {
+                const col = document.createElement('div');
+                col.className = 'band-column';
+
+                const colorObj = COLOR_DATA.find(c => c.id === selectedBands[config.key]);
+
+                col.innerHTML = `
+                    <div class="band-title">
+                        <span class="band-indicator" style="background-color: ${colorObj ? colorObj.hex : '#fff'}"></span>
+                        ${config.title}
+                    </div>
+                `;
+
+                const swatchGrid = document.createElement('div');
+                swatchGrid.className = 'swatch-grid';
+
+                COLOR_DATA.forEach(color => {
+                    const isValid = config.filter(color);
+                    const isSelected = selectedBands[config.key] === color.id;
+
+                    const btn = document.createElement('button');
+                    btn.className = `swatch-btn ${isSelected ? 'selected' : ''}`;
+                    btn.disabled = !isValid;
+
+                    btn.innerHTML = `
+                        <span class="swatch-circle" style="background-color: ${color.hex}"></span>
+                        <span>${color.name}</span>
+                    `;
+
+                    if (isValid) {
+                        btn.onclick = () => {
+                            selectedBands[config.key] = color.id;
+                            renderSwatches();
+                            calculateAndRender();
+                        };
+                    }
+
+                    swatchGrid.appendChild(btn);
+                });
+
+                col.appendChild(swatchGrid);
+                container.appendChild(col);
+            });
+        }
+
+        // Format Resistance Numbers into Readable String
+        function formatResistance(ohms) {
+            if (ohms >= 1e9) return (ohms / 1e9).toLocaleString('id-ID', { maximumFractionDigits: 2 }) + ' GΩ';
+            if (ohms >= 1e6) return (ohms / 1e6).toLocaleString('id-ID', { maximumFractionDigits: 2 }) + ' MΩ';
+            if (ohms >= 1e3) return (ohms / 1e3).toLocaleString('id-ID', { maximumFractionDigits: 2 }) + ' kΩ';
+            return ohms.toLocaleString('id-ID', { maximumFractionDigits: 2 }) + ' Ω';
+        }
+
+        // Main Calculation Engine
+        function calculateAndRender() {
+            const b1 = COLOR_DATA.find(c => c.id === selectedBands.band1);
+            const b2 = COLOR_DATA.find(c => c.id === selectedBands.band2);
+            const mult = COLOR_DATA.find(c => c.id === selectedBands.multiplier);
+            const tol = COLOR_DATA.find(c => c.id === selectedBands.tolerance);
+
+            // Update Visual SVG Colors
+            document.getElementById('svg-band1').setAttribute('fill', b1.hex);
+            document.getElementById('svg-band2').setAttribute('fill', b2.hex);
+            document.getElementById('svg-band-mult').setAttribute('fill', mult.hex);
+            document.getElementById('svg-band-tol').setAttribute('fill', tol.hex);
+
+            let digitsVal = 0;
+            if (currentMode === 4) {
+                digitsVal = (b1.digit * 10) + b2.digit;
+            } else {
+                const b3 = COLOR_DATA.find(c => c.id === selectedBands.band3);
+                document.getElementById('svg-band3').setAttribute('fill', b3.hex);
+                digitsVal = (b1.digit * 100) + (b2.digit * 10) + b3.digit;
+            }
+
+            const totalOhms = digitsVal * mult.mult;
+            const tolPercent = tol.tol || 0;
+
+            const minOhms = totalOhms * (1 - tolPercent / 100);
+            const maxOhms = totalOhms * (1 + tolPercent / 100);
+
+            // Update Result Display
+            document.getElementById('res-val-main').textContent = `${formatResistance(totalOhms)} ±${tolPercent}%`;
+            document.getElementById('res-val-range').textContent = `Rentang Toleransi: ${formatResistance(minOhms)} - ${formatResistance(maxOhms)}`;
+        }
+
+        // Reverse Search Engine (Value -> Colors)
+        function processReverseSearch() {
+            const raw = document.getElementById('input-reverse-val').value.trim().toLowerCase();
+            if (!raw) return;
+
+            let num = parseFloat(raw.replace(',', '.'));
+            if (isNaN(num)) return;
+
+            if (raw.includes('k')) num *= 1000;
+            if (raw.includes('m')) num *= 1000000;
+            if (raw.includes('g')) num *= 1000000000;
+
+            // Find optimal multiplier
+            const availableMults = COLOR_DATA.filter(c => c.mult !== null).sort((a,b) => b.mult - a.mult);
+            
+            let matchedMult = availableMults[0];
+            let sigDigits = 0;
+
+            for (let m of availableMults) {
+                let val = num / m.mult;
+                if (currentMode === 4 && val >= 10 && val < 100) {
+                    matchedMult = m;
+                    sigDigits = Math.round(val);
+                    break;
+                } else if (currentMode === 5 && val >= 100 && val < 1000) {
+                    matchedMult = m;
+                    sigDigits = Math.round(val);
+                    break;
+                }
+            }
+
+            const strDigits = sigDigits.toString();
+            if (currentMode === 4 && strDigits.length === 2) {
+                const d1 = parseInt(strDigits[0]);
+                const d2 = parseInt(strDigits[1]);
+
+                selectedBands.band1 = COLOR_DATA.find(c => c.digit === d1).id;
+                selectedBands.band2 = COLOR_DATA.find(c => c.digit === d2).id;
+                selectedBands.multiplier = matchedMult.id;
+
+                renderSwatches();
+                calculateAndRender();
+                showToast("Gelang warna diperbarui!");
+            } else if (currentMode === 5 && strDigits.length === 3) {
+                const d1 = parseInt(strDigits[0]);
+                const d2 = parseInt(strDigits[1]);
+                const d3 = parseInt(strDigits[2]);
+
+                selectedBands.band1 = COLOR_DATA.find(c => c.digit === d1).id;
+                selectedBands.band2 = COLOR_DATA.find(c => c.digit === d2).id;
+                selectedBands.band3 = COLOR_DATA.find(c => c.digit === d3).id;
+                selectedBands.multiplier = matchedMult.id;
+
+                renderSwatches();
+                calculateAndRender();
+                showToast("Gelang warna diperbarui!");
+            } else {
+                showToast("Nilai di luar jangkauan standar!");
+            }
+        }
+
+        // Apply Preset Quick Chip
+        function applyPreset(presetStr) {
+            document.getElementById('input-reverse-val').value = presetStr;
+            processReverseSearch();
+        }
+
+        // Render Reference Guide Table
+        function renderRefTable() {
+            const tbody = document.getElementById('ref-table-body');
+            tbody.innerHTML = '';
+
+            COLOR_DATA.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div style="display:flex; align-items:center; gap:0.5rem; font-weight:600;">
+                            <span class="swatch-circle" style="background:${c.hex}"></span>
+                            ${c.name}
+                        </div>
+                    </td>
+                    <td>${c.digit !== null && c.id !== 'black' ? c.digit : '-'}</td>
+                    <td>${c.digit !== null ? c.digit : '-'}</td>
+                    <td>${c.digit !== null ? c.digit : '-'}</td>
+                    <td>${c.mult !== null ? '× ' + formatResistance(c.mult) : '-'}</td>
+                    <td>${c.tol !== null ? '±' + c.tol + '%' : '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Accordion Toggle Logic
+        function toggleAccordion() {
+            const content = document.getElementById('acc-content');
+            const icon = document.getElementById('acc-icon');
+            const isOpen = content.classList.contains('open');
+
+            content.classList.toggle('open', !isOpen);
+            icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        // Copy Result to Clipboard
+        function copyResult() {
+            const mainText = document.getElementById('res-val-main').textContent;
+            const subText = document.getElementById('res-val-range').textContent;
+            const fullText = `Resistor: ${mainText} (${subText})`;
+
+            // Fallback execCommand for iframe safety
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = fullText;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            showToast("Hasil disalin ke clipboard!");
+        }
+
+        // Toast Notification System
+        function showToast(msg) {
+            const toast = document.getElementById('toast-msg');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
